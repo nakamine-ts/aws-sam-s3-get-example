@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-app
+
+  Sample SAM Template for sam-app
+
+#
+# Parameters
+#
+Parameters:
+  NameTagPrefix:
+    Type: String
+    Default: sam-app
+    Description: Prefix of Name tags.
+  Stage:
+    Type: String
+    AllowedValues:
+      - prd
+      - stg
+      - dev
+    Default: dev
+
+Mappings:
+  EnvMap:
+    prd:
+      S3Bucket: 'prd-bucket-xxx'
+    stg:
+      S3Bucket: 'stg-bucket-xxx'
+    dev:
+      S3Bucket: 'dev-bucket-xxx'
+
+
+# Grobals
+#
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+    Environment:
+      Variables:
+        S3_BUCKET: !FindInMap [ EnvMap, !Ref Stage, S3Bucket ]
+        IS_LOCAL_STACK: false
+
+#
+# Resources
+#
+Resources:
+
+# s3 read
+  S3ReadFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub ${NameTagPrefix}-${Stage}-S3ReadFunction
+      CodeUri: s3-read/
+      Handler: app.lambdaHandler
+      Runtime: nodejs8.10
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          STAGE: !Ref Stage
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !FindInMap [ EnvMap, !Ref Stage, S3Bucket ]
+
+  S3ReadFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${S3ReadFunction}
+      RetentionInDays: 14
+#
+# Outputs
+#
+Outputs:
+
+  S3ReadFunction:
+    Description: "S3 Read Lambda Function ARN"
+    Value: !GetAtt S3ReadFunction.Arn
+
+  S3ReadFunctionIamRole:
+    Description: "Implicit IAM Role created for S3 Read function"
+    Value: !GetAtt S3ReadFunctionRole.Arn
