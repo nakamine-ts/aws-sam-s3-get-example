@@ -39,7 +39,7 @@ describe('local stack test suit for bucket object', () => {
   });
 
   it('successfully get an object', async () => {
-    const message = await getS3Object({s3, event, bucket});
+    const message = await getS3Object({s3, event});
     assert.equal(message, 'Hi, there.\n');
   });
 
