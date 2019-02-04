@@ -44,15 +44,15 @@ describe('local stack test suit for bucket object', () => {
   });
 
   it('return error if access to non-existent object', async () => {
-    await getS3Object({s3, event: { Bucket: bucket, Key: 'non-existent' }, callback: (error) => {
+    await getS3Object({s3, event: { Bucket: bucket, Key: 'non-existent' }}).catch((error) => {
       assert.equal(error.toString(), 'NoSuchKey: The specified key does not exist.');
-    }});
+    });
   });
 
   it('return error if access to non-existent bucket', async () => {
-    await getS3Object({s3, event: { Bucket: 'non-existent', Key: 'non-existent' }, callback: (error) => {
+    await getS3Object({s3, event: { Bucket: 'non-existent', Key: 'non-existent' }}).catch((error) => {
       assert.equal(error.toString(), 'NoSuchBucket: The specified bucket does not exist');
-    }});
+    });
   });
 
   /*
