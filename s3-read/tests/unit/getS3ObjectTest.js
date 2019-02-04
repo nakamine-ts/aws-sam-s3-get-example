@@ -43,9 +43,17 @@ describe('local stack test suit for bucket object', () => {
     assert.equal(message, 'Hi, there.\n');
   });
 
-  // TODO: write test for non-exist bucket object
+  it('return error if access to non-existent object', async () => {
+    await getS3Object({s3, event: { Bucket: bucket, Key: 'non-existent' }, callback: (error) => {
+      assert.equal(error.toString(), 'NoSuchKey: The specified key does not exist.');
+    }});
+  });
 
-  // TODO: write test for non-exist bucket
+  it('return error if access to non-existent bucket', async () => {
+    await getS3Object({s3, event: { Bucket: 'non-existent', Key: 'non-existent' }, callback: (error) => {
+      assert.equal(error.toString(), 'NoSuchBucket: The specified bucket does not exist');
+    }});
+  });
 
   /*
    * delete all bucket objects and remove bucket
